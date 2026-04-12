@@ -143,7 +143,7 @@ function HomePage() {
                 <div>
                   <strong>Protected access</strong>
                   <p className="info-copy">
-                    Home is available only after sign-in or registration.
+                    Home is available only after sign-in or registration in LifeLine.
                   </p>
                 </div>
               </div>
