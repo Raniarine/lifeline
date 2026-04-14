@@ -30,6 +30,8 @@ export const DEFAULT_PROFILE = {
   medications: "Metformine",
   emergencyContact: "Sofia Ghazali - 0612345678",
   doctor: "Dr. Sara Ghazali",
+  doctorSpeciality: "Medecin generaliste",
+  doctorPhone: "03 25 47 89 01",
   notes: "Consignes: eviter les retards de traitement et verifier la glycemie rapidement.",
   emergencyId: "abdelmounaim-ouballa-emergency",
 };
