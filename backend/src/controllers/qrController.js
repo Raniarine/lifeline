@@ -1,1 +1,8 @@
-exports.generateQR = (req, res) => res.json({ message: 'QR controller' });
+const { buildQrPayload } = require('../services/qrService');
+
+exports.generateQR = async (req, res) => {
+  return res.json({
+    message: 'QR payload generated.',
+    qr: buildQrPayload(req.params.id),
+  });
+};

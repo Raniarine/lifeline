@@ -1,1 +1,90 @@
-/* auth styles */
+.auth-shell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-panel {
+  padding: 26px;
+}
+
+.auth-panel-featured {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 248, 255, 0.96)),
+    radial-gradient(circle at bottom right, rgba(242, 94, 94, 0.1), transparent 28%);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(23, 50, 77, 0.12);
+  background: #ffffff;
+  color: var(--color-text);
+  outline: none;
+}
+
+.field-input:focus {
+  border-color: rgba(41, 133, 247, 0.46);
+  box-shadow: 0 0 0 4px rgba(41, 133, 247, 0.12);
+}
+
+.field-input-error {
+  border-color: rgba(242, 94, 94, 0.45);
+}
+
+.field-select,
+.field-textarea {
+  padding-block: 14px;
+}
+
+.field-textarea {
+  min-height: 108px;
+  resize: vertical;
+}
+
+.field-hint,
+.helper-text,
+.text-link-subtle {
+  color: var(--color-text-soft);
+}
+
+.helper-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.text-link {
+  color: var(--color-primary-strong);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.feedback {
+  font-size: 0.88rem;
+}
+
+.feedback-error {
+  color: #d04444;
+}
