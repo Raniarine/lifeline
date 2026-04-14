@@ -1,3 +1,7 @@
-const API_BASE_URL = 'http://localhost:5001/api';
+export async function simulateRequest(payload, delay = 220) {
+  await new Promise((resolve) => {
+    window.setTimeout(resolve, delay);
+  });
 
-export default API_BASE_URL;
+  return payload instanceof Function ? payload() : payload;
+}

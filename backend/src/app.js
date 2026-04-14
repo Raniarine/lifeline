@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const emergencyRoutes = require('./routes/emergencyRoutes');
 const qrRoutes = require('./routes/qrRoutes');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/qr', qrRoutes);
+app.use(errorMiddleware);
 
 module.exports = app;

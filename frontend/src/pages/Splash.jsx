@@ -1,89 +1,56 @@
 import { Link } from "react-router-dom";
+import { ROUTES } from "../utils/constants.js";
 
-function SplashPage() {
+export default function Splash() {
   return (
-    <main className="screen">
-      <div className="page-shell">
-        <div className="status-bar">
-          <span className="status-badge">
-            <span className="pulse-dot" aria-hidden="true"></span>
-            Emergency mode ready
-          </span>
-          <span>LifeLine mobile app</span>
-        </div>
-
-        <section className="medical-card hero-card">
-          <div className="hero-grid">
-            <div>
-              <div className="brand-row">
-                <span className="brand-mark">LL</span>
-                <div className="brand-copy">
-                  <strong>LifeLine</strong>
-                  <span>Medical emergency QR access</span>
-                </div>
-              </div>
-
-              <span className="eyebrow">
-                <span className="icon-dot" aria-hidden="true"></span>
-                Emergency medical app
-              </span>
-
-              <h1 className="hero-title">Reach critical medical info faster.</h1>
-              <p className="hero-text">
-                Build a secure emergency profile, keep your QR code ready, and
-                help responders access the essentials when every second matters.
-              </p>
-
-              <div className="button-row">
-                <Link to="/login" className="button button-primary">
-                  Sign in
-                </Link>
-                <Link to="/register" className="button button-secondary">
-                  Create account
-                </Link>
-              </div>
+    <main className="screen screen-splash">
+      <section className="splash-shell">
+        <div className="splash-card">
+          <div className="brand-row splash-brand">
+            <span className="brand-mark">+</span>
+            <div className="brand-copy">
+              <strong>LifeLine</strong>
+              <span>Medical emergency companion</span>
             </div>
-
-            <aside className="hero-panel">
-              <div className="preview-card">
-                <p className="preview-label">Emergency snapshot</p>
-                <div className="preview-main">
-                  <div>
-                    <strong>Patient profile active</strong>
-                    <p>Identity, blood group, allergies, treatment, contacts.</p>
-                  </div>
-                  <span className="soft-badge">QR ready</span>
-                </div>
-
-                <div className="mini-grid">
-                  <article className="mini-card">
-                    <strong>Blood group</strong>
-                    <span>Visible instantly for responders.</span>
-                  </article>
-                  <article className="mini-card">
-                    <strong>Allergies</strong>
-                    <span>Prevent unsafe treatment decisions.</span>
-                  </article>
-                  <article className="mini-card">
-                    <strong>Emergency contact</strong>
-                    <span>Reach the right person without delay.</span>
-                  </article>
-                </div>
-              </div>
-
-              <div className="preview-card">
-                <p className="preview-label">Ready for the first flow</p>
-                <p className="hero-text">
-                  Start with your secure account, complete your emergency data,
-                  then generate your personal medical QR card.
-                </p>
-              </div>
-            </aside>
           </div>
-        </section>
-      </div>
+
+          <div className="hero-copy">
+            <span className="soft-badge">PWA ready</span>
+            <h1>Vos informations medicales, pretes au moment critique.</h1>
+            <p>
+              Un profil d'urgence mobile avec QR, fiche medicale rapide et
+              contact immediat pour les premiers secours.
+            </p>
+          </div>
+
+          <div className="device-preview">
+            <article className="mini-phone mini-phone-light">
+              <span className="mini-title">Bienvenue</span>
+              <strong>Connexion</strong>
+              <span>Acces securise au profil medical.</span>
+            </article>
+            <article className="mini-phone mini-phone-accent">
+              <span className="mini-title">Bonjour</span>
+              <strong>Tableau LifeLine</strong>
+              <span>QR, scanner, urgence rapide.</span>
+            </article>
+            <article className="mini-phone mini-phone-alert">
+              <span className="mini-title">Urgence</span>
+              <strong>Carte medicale</strong>
+              <span>Lecture instantanee des infos vitales.</span>
+            </article>
+          </div>
+
+          <div className="button-row">
+            <Link to={ROUTES.login} className="button button-primary">
+              Se connecter
+            </Link>
+            <Link to={ROUTES.register} className="button button-secondary">
+              Creer un compte
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
-
-export default SplashPage;

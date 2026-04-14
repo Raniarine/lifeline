@@ -1,70 +1,96 @@
-# Getting Started with Create React App
+# LifeLine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+LifeLine is a mobile-first emergency medical web app with a React frontend and an Express backend. The current scaffold now follows a cleaner feature-based structure so the project can grow into authentication, medical profile, QR generation, scanner flow, and emergency access.
 
-## Available Scripts
+## Structure
 
-In the project directory, you can run:
+```text
+LifeLine/
+|-- frontend/
+|   |-- public/
+|   |   |-- manifest.json
+|   |   |-- icons/
+|   |   |-- robots.txt
+|   |   `-- index.html
+|   |-- src/
+|   |   |-- assets/
+|   |   |   |-- images/
+|   |   |   |-- icons/
+|   |   |   `-- logo.png
+|   |   |-- components/
+|   |   |   |-- ui/
+|   |   |   |-- layout/
+|   |   |   `-- medical/
+|   |   |-- pages/
+|   |   |   |-- auth/
+|   |   |   |-- main/
+|   |   |   |-- profile/
+|   |   |   |-- qr/
+|   |   |   |-- emergency/
+|   |   |   `-- Splash.jsx
+|   |   |-- routes/
+|   |   |-- context/
+|   |   |-- services/
+|   |   |-- hooks/
+|   |   |-- utils/
+|   |   |-- styles/
+|   |   |-- pwa/
+|   |   |-- App.jsx
+|   |   `-- main.jsx
+|   |-- index.html
+|   `-- package.json
+|-- backend/
+|   |-- src/
+|   |   |-- config/
+|   |   |-- controllers/
+|   |   |-- models/
+|   |   |-- routes/
+|   |   |-- middlewares/
+|   |   |-- services/
+|   |   |-- utils/
+|   |   `-- app.js
+|   |-- server.js
+|   |-- .env
+|   `-- package.json
+|-- docs/
+|   |-- presentation.pdf
+|   |-- cahier_de_charge.pdf
+|   |-- uml/
+|   `-- screenshots/
+`-- README.md
+```
 
-### `npm start`
+## Frontend status
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Splash, login, register, home, dashboard, profile, medical form, QR, scanner, and emergency preview pages are wired.
+- Auth and profile data are currently persisted in local storage so the UI can be used before full backend integration.
+- PWA support files and manifest placeholders are included.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Backend status
 
-### `npm test`
+- Express routes are scaffolded for auth, user profile, QR, and emergency access.
+- `MedicalProfile` and `EmergencyLog` models were added to match the requested architecture.
+- Controllers currently return structured starter responses and are ready for real database logic.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Run locally
 
-### `npm run build`
+Frontend:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Backend:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-### `npm run eject`
+## Notes
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `frontend/index.html` remains the active Vite entry point. `frontend/public/index.html` is included only to mirror your requested tree.
+- Some docs and icon assets are placeholder files so the structure is complete and ready for real project material.
