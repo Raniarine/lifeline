@@ -7,8 +7,7 @@ import Button from "../../components/ui/Button.jsx";
 import Card from "../../components/ui/Card.jsx";
 import { AppContext } from "../../context/AppContext.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
-import { extractEmergencyShareId } from "../../services/qrService.js";
-import { ROUTES } from "../../utils/constants.js";
+import { parseEmergencyQrNavigation } from "../../services/qrService.js";
 
 export default function Scanner() {
   const navigate = useNavigate();
@@ -57,18 +56,18 @@ export default function Scanner() {
 
   function handleDecoded(result) {
     const rawValue = typeof result === "string" ? result : result?.data || "";
-    const shareId = extractEmergencyShareId(rawValue);
+    const parsed = parseEmergencyQrNavigation(rawValue);
 
     setDetectedValue(rawValue);
-    saveLastScan(shareId || rawValue);
+    saveLastScan(rawValue);
 
     if (scannerRef.current) {
       scannerRef.current.stop();
       setIsScannerActive(false);
     }
 
-    if (shareId) {
-      navigate(`${ROUTES.emergency}/${shareId}`);
+    if (parsed.route) {
+      navigate(parsed.route);
     }
   }
 
@@ -138,7 +137,7 @@ export default function Scanner() {
     }
   }
 
-  const scannedShareId = extractEmergencyShareId(appState.lastScan || detectedValue);
+  const scannedNavigation = parseEmergencyQrNavigation(appState.lastScan || detectedValue);
 
   return (
     <main className="screen">
@@ -215,10 +214,10 @@ export default function Scanner() {
           {appState.lastScan ? (
             <Card className="menu-card result-card">
               <p className="section-copy">
-                QR detecte: {scannedShareId || appState.lastScan}
+                QR detecte: {scannedNavigation.shareId || appState.lastScan}
               </p>
-              {scannedShareId ? (
-                <Link to={`${ROUTES.emergency}/${scannedShareId}`} className="button button-primary">
+              {scannedNavigation.route ? (
+                <Link to={scannedNavigation.route} className="button button-primary">
                   Voir la fiche medicale
                 </Link>
               ) : (

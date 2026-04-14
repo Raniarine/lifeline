@@ -1,22 +1,25 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import EmergencyCard from "../../components/medical/EmergencyCard.jsx";
 import Button from "../../components/ui/Button.jsx";
 import Card from "../../components/ui/Card.jsx";
 import Loader from "../../components/ui/Loader.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
-import { getEmergencyPreview } from "../../services/qrService.js";
+import { decodeEmergencyData, getEmergencyPreview } from "../../services/qrService.js";
 import { DEFAULT_PROFILE, ROUTES } from "../../utils/constants.js";
 
 export default function Emergency() {
   const { shareId } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [preview, setPreview] = useState(null);
+  const sharedDataParam = searchParams.get("data");
+  const sharedProfile = useMemo(() => decodeEmergencyData(sharedDataParam), [sharedDataParam]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const sourceProfile = user || DEFAULT_PROFILE;
+    const sourceProfile = sharedProfile || user || DEFAULT_PROFILE;
 
     getEmergencyPreview({
       ...sourceProfile,
@@ -30,7 +33,7 @@ export default function Emergency() {
     return () => {
       cancelled = true;
     };
-  }, [shareId, user]);
+  }, [shareId, sharedProfile, user]);
 
   if (!preview) {
     return <Loader label="Chargement de la carte d'urgence..." />;
@@ -40,11 +43,6 @@ export default function Emergency() {
     <main className="screen emergency-screen">
       <section className="emergency-shell">
         <Card className="emergency-wrapper">
-          <div className="card-top-row">
-            <span className="soft-badge">Urgence medicale</span>
-            <span className="status-chip">Prioritaire</span>
-          </div>
-
           <EmergencyCard
             profile={{
               ...preview.identity,
@@ -53,23 +51,24 @@ export default function Emergency() {
               medications: preview.medications,
               emergencyContact: preview.emergencyContact,
               doctor: preview.doctor,
+              doctorSpeciality: preview.doctorSpeciality,
+              doctorPhone: preview.doctorPhone,
+              notes: preview.notes,
             }}
           />
 
-          <div className="emergency-note">
-            <span>Consigne</span>
-            <strong>{preview.notes || "Aucune note supplementaire."}</strong>
-          </div>
-
           <div className="emergency-actions">
-            <a href={`tel:${preview.identity.phone || "0612345678"}`} className="button button-primary">
+            <a href={`tel:${preview.identity.phone || "0612345678"}`} className="button button-emergency">
               Appeler
             </a>
-            <Button variant="accent" onClick={() => window.print()}>
+          </div>
+
+          <div className="emergency-secondary-actions">
+            <Button variant="ghost" onClick={() => window.print()}>
               Imprimer
             </Button>
-            <Link to={ROUTES.home} className="button button-secondary">
-              Retour
+            <Link to={ROUTES.home} className="text-link emergency-back-link">
+              Retour a l'app
             </Link>
           </div>
         </Card>

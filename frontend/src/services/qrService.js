@@ -3,12 +3,73 @@ import { simulateRequest } from "./api.js";
 import { ROUTES } from "../utils/constants.js";
 import { buildEmergencyId, splitList } from "../utils/helpers.js";
 
-export function buildEmergencyUrl(shareId) {
+function encodeBase64Url(value) {
+  const utf8 = new TextEncoder().encode(value);
+  let binary = "";
+
+  utf8.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function decodeBase64Url(value) {
+  const normalized = String(value || "").replace(/-/g, "+").replace(/_/g, "/");
+  const paddingLength = (4 - (normalized.length % 4 || 4)) % 4;
+  const padded = normalized + "=".repeat(paddingLength);
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+
+  return new TextDecoder().decode(bytes);
+}
+
+function buildSharedEmergencyPayload(profile, shareId) {
+  return {
+    shareId,
+    fullName: profile?.fullName || "",
+    email: profile?.email || "",
+    phone: profile?.phone || "",
+    bloodType: profile?.bloodType || "",
+    allergies: splitList(profile?.allergies),
+    conditions: splitList(profile?.conditions),
+    medications: splitList(profile?.medications),
+    doctor: profile?.doctor || "",
+    doctorSpeciality: profile?.doctorSpeciality || "",
+    doctorPhone: profile?.doctorPhone || "",
+    emergencyContact: profile?.emergencyContact || "",
+    notes: profile?.notes || "",
+  };
+}
+
+export function encodeEmergencyData(profile, shareId) {
+  return encodeBase64Url(JSON.stringify(buildSharedEmergencyPayload(profile, shareId)));
+}
+
+export function decodeEmergencyData(value) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(decodeBase64Url(value));
+  } catch {
+    return null;
+  }
+}
+
+export function buildEmergencyUrl(shareId, profile) {
   if (typeof window === "undefined") {
     return `/emergency/${shareId}`;
   }
 
-  return new URL(`/emergency/${shareId}`, window.location.origin).toString();
+  const url = new URL(`/emergency/${shareId}`, window.location.origin);
+
+  if (profile) {
+    url.searchParams.set("data", encodeEmergencyData(profile, shareId));
+  }
+
+  return url.toString();
 }
 
 export async function getQRCodeData(profile) {
@@ -17,7 +78,7 @@ export async function getQRCodeData(profile) {
 
     return {
       shareId,
-      shareUrl: buildEmergencyUrl(shareId),
+      shareUrl: buildEmergencyUrl(shareId, profile),
       fullName: profile?.fullName,
       email: profile?.email,
       bloodType: profile?.bloodType,
@@ -40,6 +101,8 @@ export async function getEmergencyPreview(profile) {
     conditions: splitList(profile?.conditions),
     medications: splitList(profile?.medications),
     doctor: profile?.doctor,
+    doctorSpeciality: profile?.doctorSpeciality,
+    doctorPhone: profile?.doctorPhone,
     emergencyContact: profile?.emergencyContact,
     notes: profile?.notes,
   }));
@@ -68,11 +131,15 @@ export function downloadQRCode(dataUrl, filename = "lifeline-qr.png") {
   link.click();
 }
 
-export function extractEmergencyShareId(value) {
+export function parseEmergencyQrNavigation(value) {
   const rawValue = String(value || "").trim();
 
   if (!rawValue) {
-    return "";
+    return {
+      shareId: "",
+      route: "",
+      rawValue: "",
+    };
   }
 
   const fallbackBase =
@@ -81,7 +148,22 @@ export function extractEmergencyShareId(value) {
   const directMatch = rawValue.match(/\/emergency\/([^/?#]+)/i);
 
   if (directMatch?.[1]) {
-    return decodeURIComponent(directMatch[1]);
+    const shareId = decodeURIComponent(directMatch[1]);
+    let search = "";
+
+    try {
+      const url = new URL(rawValue, fallbackBase);
+      search = url.search;
+    } catch {
+      const [, queryString = ""] = rawValue.split("?");
+      search = queryString ? `?${queryString}` : "";
+    }
+
+    return {
+      shareId,
+      route: `${ROUTES.emergency}/${shareId}${search}`,
+      rawValue,
+    };
   }
 
   try {
@@ -89,11 +171,41 @@ export function extractEmergencyShareId(value) {
     const routePrefix = `${ROUTES.emergency}/`;
 
     if (url.pathname.startsWith(routePrefix)) {
-      return decodeURIComponent(url.pathname.slice(routePrefix.length));
+      const shareId = decodeURIComponent(url.pathname.slice(routePrefix.length));
+
+      return {
+        shareId,
+        route: `${ROUTES.emergency}/${shareId}${url.search}`,
+        rawValue,
+      };
     }
   } catch {
-    return /^[a-z0-9-]+$/i.test(rawValue) ? rawValue : "";
+    if (/^[a-z0-9-]+$/i.test(rawValue)) {
+      return {
+        shareId: rawValue,
+        route: `${ROUTES.emergency}/${rawValue}`,
+        rawValue,
+      };
+    }
+
+    return {
+      shareId: "",
+      route: "",
+      rawValue,
+    };
   }
 
-  return /^[a-z0-9-]+$/i.test(rawValue) ? rawValue : "";
+  if (/^[a-z0-9-]+$/i.test(rawValue)) {
+    return {
+      shareId: rawValue,
+      route: `${ROUTES.emergency}/${rawValue}`,
+      rawValue,
+    };
+  }
+
+  return {
+    shareId: "",
+    route: "",
+    rawValue,
+  };
 }
