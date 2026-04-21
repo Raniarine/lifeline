@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import EmergencyCard from "../../components/medical/EmergencyCard.jsx";
 import Button from "../../components/ui/Button.jsx";
@@ -11,27 +11,26 @@ import { ROUTES } from "../../utils/constants.js";
 export default function Emergency() {
   const { token } = useParams();
   const location = useLocation();
-  const [preview, setPreview] = useState(null);
-  const [error, setError] = useState("");
+  const previewParam = useMemo(
+    () => new URLSearchParams(location.search).get("preview") || "",
+    [location.search]
+  );
+  const localPreview = useMemo(() => decodeEmergencyPreview(previewParam), [previewParam]);
+  const [preview, setPreview] = useState(() => localPreview);
+  const [error, setError] = useState(() => (localPreview ? "" : token ? "" : "QR token missing."));
 
   useEffect(() => {
     let cancelled = false;
-    const previewParam = new URLSearchParams(location.search).get("preview") || "";
-    const localPreview = decodeEmergencyPreview(previewParam);
 
     if (!token) {
-      if (localPreview) {
-        setPreview(localPreview);
-        setError("");
-      } else {
-        setError("QR token missing.");
-      }
+      setPreview(localPreview);
+      setError(localPreview ? "" : "QR token missing.");
       return () => {
         cancelled = true;
       };
     }
 
-    setPreview(null);
+    setPreview(localPreview);
     setError("");
 
     getEmergencyProfile(token)
@@ -54,7 +53,7 @@ export default function Emergency() {
     return () => {
       cancelled = true;
     };
-  }, [location.search, token]);
+  }, [localPreview, token]);
 
   if (!preview && !error) {
     return <Loader label="Chargement de la carte d'urgence..." />;
