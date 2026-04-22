@@ -1,16 +1,20 @@
 const mongoose = require('mongoose');
 
 async function connectDB() {
-  if (!process.env.MONGO_URI) {
-    console.warn('MONGO_URI is not set. LifeLine API will start without a database connection.');
-    return;
+  const mongoUri = String(process.env.MONGO_URI || '').trim();
+
+  if (!mongoUri) {
+    throw new Error(
+      'MONGO_URI is not set. Add it to backend/.env before starting the LifeLine API.'
+    );
   }
 
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
+    return mongoose.connection;
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
+    throw new Error(`MongoDB connection failed: ${error.message}`);
   }
 }
 
