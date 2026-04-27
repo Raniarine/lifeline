@@ -275,9 +275,12 @@ export default function Splash() {
           </div>
 
           {slide.features ? (
-            <div className="onboarding-feature-grid">
+            <div className={`onboarding-feature-grid onboarding-feature-grid-${slide.panelType}`}>
               {slide.features.map((feature) => (
-                <article key={feature.title} className="onboarding-feature-card">
+                <article
+                  key={feature.title}
+                  className={`onboarding-feature-card onboarding-feature-card-${slide.panelType}`}
+                >
                   <span className="onboarding-feature-icon">
                     <FeatureIcon type={feature.icon} />
                   </span>
