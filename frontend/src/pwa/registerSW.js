@@ -8,8 +8,23 @@ export function registerSW() {
   }
 
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js").catch((error) => {
-      console.error("LifeLine service worker registration failed.", error);
-    });
+    navigator.serviceWorker
+      .register("/service-worker.js")
+      .then(async () => {
+        await navigator.serviceWorker.ready;
+
+        const reloadFlag = "lifeline.sw.controller.reload";
+
+        if (!navigator.serviceWorker.controller && !window.sessionStorage.getItem(reloadFlag)) {
+          window.sessionStorage.setItem(reloadFlag, "1");
+          window.location.reload();
+          return;
+        }
+
+        window.sessionStorage.removeItem(reloadFlag);
+      })
+      .catch((error) => {
+        console.error("LifeLine service worker registration failed.", error);
+      });
   });
 }

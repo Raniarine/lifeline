@@ -1,76 +1,97 @@
-const APP_VERSION = "lifeline-v1";
+const APP_VERSION = "lifeline-v2";
 const APP_SHELL_CACHE = `${APP_VERSION}-shell`;
 const RUNTIME_CACHE = `${APP_VERSION}-runtime`;
-const APP_SHELL_ASSETS = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
+const OFFLINE_URL = "/offline.html";
+const PWA_ASSET_MANIFEST_URL = "/pwa-assets.json";
+const STATIC_URLS = [
+  "/",
+  OFFLINE_URL,
+  PWA_ASSET_MANIFEST_URL,
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+];
+
+function isSameOrigin(url) {
+  return url.origin === self.location.origin;
+}
+
+async function buildPrecacheUrls() {
+  try {
+    const response = await fetch(PWA_ASSET_MANIFEST_URL, { cache: "no-store" });
+    const assetUrls = await response.json();
+
+    if (!Array.isArray(assetUrls)) {
+      return STATIC_URLS;
+    }
+
+    return [...new Set([...STATIC_URLS, ...assetUrls])];
+  } catch {
+    return STATIC_URLS;
+  }
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(APP_SHELL_CACHE)
-      .then((cache) => cache.addAll(APP_SHELL_ASSETS))
-      .then(() => self.skipWaiting())
+    (async () => {
+      const precacheUrls = await buildPrecacheUrls();
+      const cache = await caches.open(APP_SHELL_CACHE);
+      await cache.addAll(precacheUrls);
+      await self.skipWaiting();
+    })()
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => ![APP_SHELL_CACHE, RUNTIME_CACHE].includes(key))
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => ![APP_SHELL_CACHE, RUNTIME_CACHE].includes(key))
+          .map((key) => caches.delete(key))
+      );
+      await self.clients.claim();
+    })()
   );
 });
 
-function isCacheableRequest(requestUrl) {
-  return requestUrl.origin === self.location.origin;
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  const response = await fetch(request);
+
+  if (response.ok) {
+    const cache = await caches.open(RUNTIME_CACHE);
+    cache.put(request, response.clone());
+  }
+
+  return response;
 }
 
 async function networkFirst(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
-
   try {
     const response = await fetch(request);
 
-    if (request.method === "GET" && response.ok && isCacheableRequest(new URL(request.url))) {
+    if (response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
       cache.put(request, response.clone());
     }
 
     return response;
-  } catch (error) {
-    const cachedResponse = await cache.match(request);
+  } catch {
+    const cachedResponse = await caches.match(request);
 
     if (cachedResponse) {
       return cachedResponse;
     }
 
-    if (request.mode === "navigate") {
-      return caches.match("/");
-    }
-
-    throw error;
+    return caches.match(OFFLINE_URL);
   }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
-  const cachedResponse = await cache.match(request);
-  const fetchPromise = fetch(request)
-    .then((response) => {
-      if (response.ok && isCacheableRequest(new URL(request.url))) {
-        cache.put(request, response.clone());
-      }
-
-      return response;
-    })
-    .catch(() => null);
-
-  return cachedResponse || fetchPromise || Response.error();
 }
 
 self.addEventListener("fetch", (event) => {
@@ -82,7 +103,7 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(request.url);
 
-  if (!isCacheableRequest(requestUrl)) {
+  if (!isSameOrigin(requestUrl)) {
     return;
   }
 
@@ -91,5 +112,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request));
+  event.respondWith(
+    cacheFirst(request).catch(async () => {
+      const cachedResponse = await caches.match(request);
+
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return new Response("", {
+        status: 503,
+        statusText: "Offline asset unavailable",
+      });
+    })
+  );
 });
